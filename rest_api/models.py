@@ -33,6 +33,10 @@ class Users(models.Model):
         managed = False
         db_table = 'users'
 
+class UserSession(models.Model):
+    user = models.ForeignKey(Users, on_delete=models.CASCADE)
+    session_token = models.CharField(unique=True, max_length=100)
+
 class Category(models.Model):
     name = models.CharField(unique=True, max_length=255)
     active = models.BooleanField(default=False)
