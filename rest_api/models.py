@@ -40,6 +40,7 @@ class UserSession(models.Model):
 class Category(models.Model):
     name = models.CharField(unique=True, max_length=255)
     active = models.BooleanField(default=False)
+    image = models.BinaryField(blank=True, null=True)
 
 class CategoryRecipe(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
