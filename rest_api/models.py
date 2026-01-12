@@ -26,7 +26,7 @@ class Recipes(models.Model):
 class Users(models.Model):
     id = models.BigAutoField(primary_key=True)
     active = models.BooleanField()
-    password_hash = models.CharField(max_length=255, blank=True, null=True)
+    password = models.CharField(max_length=255, blank=True, null=True)
     username = models.CharField(unique=True, max_length=255)
 
     class Meta:
