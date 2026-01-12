@@ -1,7 +1,9 @@
 import re
+import secrets
+
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import Users
+from .models import Users, UserSession
 import json
 
 # Utilizamos la libería re (regular expression) para poder crear expresiones regulares
@@ -47,3 +49,40 @@ def create_user(request):
     user = Users.objects.create(username=username, password=password, active=True)
 
     return JsonResponse({'message': 'User registered successfully', 'user_id': user.id}, status=201)
+
+
+@csrf_exempt
+def login_user(request):
+    if request.method != 'POST': # Si el método no es un POST: ERROR
+        return JsonResponse({'status': 'error', 'message': 'Method not allowed'}, status=405)
+
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'status': 'error', 'message': 'Invalid JSON'}, status=400)
+
+    username = data.get('username')
+    password = data.get('password')
+
+    # Si la contraseña o el username están vacíos:
+    if not username or not password:
+        return JsonResponse({'status': 'error', 'message': 'Missing username or password'}, status=400)
+
+    # Buscamos entre los users si existe alguno con el nombre de usuario
+    try:
+        user = Users.objects.get(username=username)
+    except Users.DoesNotExist: # Si no existe, error
+        return JsonResponse({'status': 'error', 'message': 'Username does not exist'}, status=401)
+
+    # Si existe el username, proseguimos y comprobamos si las contraseñas coinciden; si no coinciden, error
+    if user.password != password:
+        return JsonResponse({'status': 'error', 'message': 'Passwords do not match'}, status=401)
+
+    # generamos un token de 16 bytes que será convertido a hexadecimal
+    token = secrets.token_hex(16)
+
+    # Creamos la sesión y le asignamos el token
+    session = UserSession.objects.create(user=user, session_token=token)
+
+    # Devolvemos el token de sesión
+    return JsonResponse({'sessionToken': token}, status=201)
