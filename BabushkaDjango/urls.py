@@ -14,7 +14,13 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.urls import path
+from django.urls import path, include
+from rest_api import admin
+from rest_api.endpoints import create_recipe
 
 urlpatterns = [
+    path("admin/", admin.site.urls),
+
+    # Crear Receta
+    path("api/recipes", create_recipe, name="create_recipe"),
 ]
