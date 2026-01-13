@@ -73,3 +73,7 @@ def create_recipe(request):
         },
         status=201
     )
+
+@csrf_exempt
+def health(request):
+    return JsonResponse({'status': 'ok'})

@@ -15,12 +15,10 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path, include
-from rest_api import admin
-from rest_api.endpoints import create_recipe
+from rest_api.endpoints import *
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
-
     # Crear Receta
+    path("health", health, name="health"),
     path("api/recipes", create_recipe, name="create_recipe"),
 ]
