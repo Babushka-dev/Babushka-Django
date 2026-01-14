@@ -100,7 +100,7 @@ def get_recipes(request):
         })
 
     # Devolvemos la respuesta
-    return JsonResponse(data,status=200)
+    return JsonResponse({'status': 'success', 'data': data},status=200)
 
 
 # FUNCIÓN PRUEBA
