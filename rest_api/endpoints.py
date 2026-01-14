@@ -76,17 +76,42 @@ def create_recipe(request):
 
 
 # FUNCIÓN OBTENER RECETA
+
 @csrf_exempt
 def get_recipes(request):
 
     # Solo permitimos GET
     if request.method != 'GET':
-        return JsonResponse({'status': 'error', 'message': 'Method not allowed'}, status=405)
+        return JsonResponse(
+            {'status': 'error', 'message': 'Method not allowed'},
+            status=405
+        )
 
     # Obtenemos solo las recetas activas
-    recipes = Recipes.objects.filter(active=True)
+    recipes = Recipes.objects.filter(active=True).order_by('id')
 
-    # Convertimos las recetas a una lista de diccionarios
+    # Leemos parámetros opcionales
+    page = request.GET.get('page')
+    size = request.GET.get('size')
+
+    # Si vienen page y size, aplicamos paginación
+    if page is not None and size is not None:
+        # Comprobamos que sean números
+        if not page.isdigit() or not size.isdigit():
+            return JsonResponse({'status': 'error', 'message': 'page and size must be integers'},status=400)
+
+        page = int(page)
+        size = int(size)
+
+        if size <= 0:
+            return JsonResponse({'status': 'error', 'message': 'size must be greater than 0'},status=400)
+
+        # Clave de la paginación
+        start = page * size
+        end = start + size
+        recipes = recipes[start:end]
+
+    # Convertimos las recetas a lista de diccionarios
     data = []
     for recipe in recipes:
         data.append({
@@ -96,11 +121,10 @@ def get_recipes(request):
             'ingredients': recipe.ingredients,
             'preparation': recipe.preparation,
             'difficulty': recipe.difficulty,
-            'userId': recipe.user.id if recipe.user else None # Si no hay usuario se pone None
+            'userId': recipe.user.id if recipe.user else None
         })
 
-    # Devolvemos la respuesta
-    return JsonResponse({'status': 'success', 'data': data},status=200)
+    return JsonResponse({'status': 'success', 'count': len(data), 'data': data },status=200 )
 
 
 # FUNCIÓN PRUEBA
