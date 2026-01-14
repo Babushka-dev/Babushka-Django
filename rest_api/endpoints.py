@@ -90,6 +90,14 @@ def get_recipes(request):
     # Obtenemos solo las recetas activas
     recipes = Recipes.objects.filter(active=True).order_by('id')
 
+    # Búsqueda
+    search = request.GET.get('search')
+    if search:
+        recipes = recipes.filter(title__icontains=search)
+
+    # Orden estable (muy importante para paginación)
+    recipes = recipes.order_by('id')
+
     # Leemos parámetros opcionales
     page = request.GET.get('page')
     size = request.GET.get('size')
