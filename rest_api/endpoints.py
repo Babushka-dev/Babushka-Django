@@ -74,6 +74,36 @@ def create_recipe(request):
         status=201
     )
 
+
+# FUNCIÓN OBTENER RECETA
+@csrf_exempt
+def get_recipes(request):
+
+    # Solo permitimos GET
+    if request.method != 'GET':
+        return JsonResponse({'status': 'error', 'message': 'Method not allowed'}, status=405)
+
+    # Obtenemos solo las recetas activas
+    recipes = Recipes.objects.filter(active=True)
+
+    # Convertimos las recetas a una lista de diccionarios
+    data = []
+    for recipe in recipes:
+        data.append({
+            'id': recipe.id,
+            'title': recipe.title,
+            'description': recipe.description,
+            'ingredients': recipe.ingredients,
+            'preparation': recipe.preparation,
+            'difficulty': recipe.difficulty,
+            'userId': recipe.user.id if recipe.user else None # Si no hay usuario se pone None
+        })
+
+    # Devolvemos la respuesta
+    return JsonResponse(data,status=200)
+
+
+# FUNCIÓN PRUEBA
 @csrf_exempt
 def health(request):
     return JsonResponse({'status': 'ok'})
