@@ -15,9 +15,9 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path
-from . import endpoints
+from rest_api import endpoints
 
 urlpatterns = [
     path('users', endpoints.create_user),
-    path('users/sessions', endpoints.login_user)
+    path('sessions', endpoints.login_user)
 ]
