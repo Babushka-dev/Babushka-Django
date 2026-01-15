@@ -8,7 +8,7 @@
 from django.db import models
 
 
-class Recipes(models.Model):
+class Recipe(models.Model):
     id = models.BigAutoField(primary_key=True)
     active = models.BooleanField()
     description = models.TextField(blank=True, null=True)
@@ -17,13 +17,13 @@ class Recipes(models.Model):
     ingredients = models.TextField(blank=True, null=True)
     preparation = models.TextField(blank=True, null=True)
     title = models.CharField(max_length=255)
-    user = models.ForeignKey('Users', models.DO_NOTHING, blank=True, null=True)
+    user = models.ForeignKey('User', models.DO_NOTHING, blank=True, null=True)
 
     class Meta:
         managed = False
-        db_table = 'recipes'
+        db_table = 'recipe'
 
-class Users(models.Model):
+class User(models.Model):
     id = models.BigAutoField(primary_key=True)
     active = models.BooleanField()
     password_hash = models.CharField(max_length=255, blank=True, null=True)
@@ -31,10 +31,10 @@ class Users(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'users'
+        db_table = 'user'
 
 class UserSession(models.Model):
-    user = models.ForeignKey(Users, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     session_token = models.CharField(unique=True, max_length=100)
 
 class Category(models.Model):
@@ -44,9 +44,9 @@ class Category(models.Model):
 
 class CategoryRecipe(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    recipe = models.ForeignKey(Recipes, on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
 
 class UserFavoriteRecipe(models.Model):
-    user = models.ForeignKey(Users, on_delete=models.CASCADE)
-    recipe = models.ForeignKey(Recipes, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
 

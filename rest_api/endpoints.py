@@ -4,7 +4,7 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from rest_api.models import Recipes
+from rest_api.models import Recipe
 
 # FUNCIÓN CREAR RECETA
 @csrf_exempt
@@ -46,7 +46,7 @@ def create_recipe(request):
         return JsonResponse({'status': 'error', 'message': 'Title cannot exceed 50 characters'},status=400)
 
     # Creamos la receta (sin guardar)
-    recipe = Recipes(
+    recipe = Recipe(
         title=title,
         description=description,
         ingredients=ingredients,
@@ -88,7 +88,7 @@ def get_recipes(request):
         )
 
     # Obtenemos solo las recetas activas
-    recipes = Recipes.objects.filter(active=True).order_by('id')
+    recipes = Recipe.objects.filter(active=True).order_by('id')
 
     # Búsqueda
     search = request.GET.get('search')
