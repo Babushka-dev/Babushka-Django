@@ -22,5 +22,5 @@ urlpatterns = [
     path("health", health, name="health"),
     path("recipe", create_recipe, name="create_recipe"),
     path("recipe/get-page", get_recipes, name="get_recipes"),
-    path("recipe/{id}/get-image", get_recipe_image, name="get_recipe_image")
+    path("recipe/<int:id>/get-image", get_recipe_image, name="get_recipe_image")
 ]
