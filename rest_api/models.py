@@ -53,11 +53,6 @@ class User(models.Model):
     class Meta:
         managed = False
         db_table = 'user'
-    password = models.CharField(max_length=255)
-
-    class Meta:
-        managed = False
-        db_table = 'user'
 
 
 class UserFavoriteRecipes(models.Model):
