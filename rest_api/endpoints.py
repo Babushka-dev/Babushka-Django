@@ -1,7 +1,7 @@
 import base64
 import json
 
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from rest_api.models import Recipe
@@ -131,8 +131,30 @@ def get_recipes(request):
             'difficulty': recipe.difficulty,
             'userId': recipe.user.id if recipe.user else None
         })
-
     return JsonResponse({'status': 'success', 'count': len(data), 'data': data },status=200 )
+
+
+# FUNCIÓN DESCARGA IMAGEN
+@csrf_exempt
+def get_recipe_image(request, id):
+
+    # Solo GET
+    if request.method != 'GET':
+        return JsonResponse({'status': 'error', 'message': 'Method not allowed'},status=405)
+
+    # Buscamos la receta activa por id
+    recipe = Recipe.objects.filter(id=id, active=True).first()
+
+    if not recipe:
+        return JsonResponse({'status': 'error', 'message': 'Recipe not found'},status=404)
+
+    # Si no tiene imagen
+    if not recipe.image:
+        return JsonResponse({'status': 'error', 'message': 'Recipe has no image'},status=404)
+
+    # Devolvemos los bytes de la imagen (bytea)
+    return HttpResponse( recipe.image, content_type='image/jpeg')
+
 
 
 # FUNCIÓN PRUEBA

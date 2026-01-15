@@ -17,8 +17,10 @@ Including another URLconf
 from django.urls import path
 from rest_api.endpoints import *
 
+# TODO: Cambiar a APIRest
 urlpatterns = [
     path("health", health, name="health"),
-    path("recipes", create_recipe, name="create_recipe"),
-    path("recipes/get", get_recipes, name="get_recipes"),
+    path("recipe", create_recipe, name="create_recipe"),
+    path("recipe/get-page", get_recipes, name="get_recipes"),
+    path("recipe/{id}/get-image", get_recipe_image, name="get_recipe_image")
 ]
