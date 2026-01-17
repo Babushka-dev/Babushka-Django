@@ -6,14 +6,20 @@ from django.views.decorators.csrf import csrf_exempt
 
 from rest_api.models import Recipe
 
-# FUNCIÓN CREAR RECETA
+# Función según petición recibida
 @csrf_exempt
-def create_recipe(request):
+def manage_recipe(request):
 
     # Comprobamos que el HTTP sea POST
-    if request.method != 'POST':
-        return JsonResponse({'status': 'error', 'message': 'Method not allowed'}, status=405 )
+    if request.method == 'POST':
+       return create_recipe(request)
+    elif request.method == 'GET':
+        return get_recipes(request)
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Method not allowed'}, status=405)
 
+#POST
+def create_recipe(request):
     # Leer el JSON
     try:
         data = json.loads(request.body)
@@ -42,7 +48,7 @@ def create_recipe(request):
         return JsonResponse({'status': 'error', 'message': 'Difficulty must be between 1 and 5'}, status=400)
 
     # Si title tiene más de 50 caracteres
-    if len(title) > 50:
+    if len(title) > 25:
         return JsonResponse({'status': 'error', 'message': 'Title cannot exceed 50 characters'},status=400)
 
     # Creamos la receta (sin guardar)
@@ -75,28 +81,15 @@ def create_recipe(request):
     )
 
 
-# FUNCIÓN OBTENER RECETA
-
-@csrf_exempt
+# GET
 def get_recipes(request):
-
-    # Solo permitimos GET
-    if request.method != 'GET':
-        return JsonResponse(
-            {'status': 'error', 'message': 'Method not allowed'},
-            status=405
-        )
-
     # Obtenemos solo las recetas activas
-    recipes = Recipe.objects.filter(active=True).order_by('id')
+    recipes = Recipe.objects.filter(active=True)
 
     # Búsqueda
     search = request.GET.get('search')
     if search:
         recipes = recipes.filter(title__icontains=search)
-
-    # Orden estable (muy importante para paginación)
-    recipes = recipes.order_by('id')
 
     # Leemos parámetros opcionales
     page = request.GET.get('page')
@@ -104,15 +97,16 @@ def get_recipes(request):
 
     # Si vienen page y size, aplicamos paginación
     if page is not None and size is not None:
-        # Comprobamos que sean números
-        if not page.isdigit() or not size.isdigit():
+        try:
+            page = int(page)
+            size = int(size)
+        except Exception:
             return JsonResponse({'status': 'error', 'message': 'page and size must be integers'},status=400)
-
-        page = int(page)
-        size = int(size)
 
         if size <= 0:
             return JsonResponse({'status': 'error', 'message': 'size must be greater than 0'},status=400)
+        if page <= 0:
+            return JsonResponse({'status': 'error', 'message': 'page must be greater than 0'}, status=400)
 
         # Clave de la paginación
         start = page * size
@@ -154,7 +148,6 @@ def get_recipe_image(request, id):
 
     # Devolvemos los bytes de la imagen (bytea)
     return HttpResponse( recipe.image, content_type='image/jpeg')
-
 
 
 # FUNCIÓN PRUEBA
