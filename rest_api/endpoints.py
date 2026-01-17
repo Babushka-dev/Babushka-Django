@@ -105,7 +105,7 @@ def get_recipes(request):
 
         if size <= 0:
             return JsonResponse({'status': 'error', 'message': 'size must be greater than 0'},status=400)
-        if page <= 0:
+        if page < 0:
             return JsonResponse({'status': 'error', 'message': 'page must be greater than 0'}, status=400)
 
         # Clave de la paginación
