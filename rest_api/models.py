@@ -8,45 +8,67 @@
 from django.db import models
 
 
-class Recipes(models.Model):
+class Category(models.Model):
     id = models.BigAutoField(primary_key=True)
     active = models.BooleanField()
-    description = models.TextField(blank=True, null=True)
+    image = models.BinaryField(blank=True, null=True)
+    name = models.CharField(max_length=25)
+
+    class Meta:
+        managed = False
+        db_table = 'category'
+
+
+class Recipe(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    active = models.BooleanField()
+    description = models.CharField(max_length=100, blank=True, null=True)
     difficulty = models.IntegerField()
     image = models.BinaryField(blank=True, null=True)
-    ingredients = models.TextField(blank=True, null=True)
-    preparation = models.TextField(blank=True, null=True)
-    title = models.CharField(max_length=255)
-    user = models.ForeignKey('Users', models.DO_NOTHING, blank=True, null=True)
+    ingredients = models.CharField(max_length=1000, blank=True, null=True)
+    preparation = models.CharField(max_length=1000, blank=True, null=True)
+    title = models.CharField(max_length=25)
+    user = models.ForeignKey('User', models.DO_NOTHING, blank=True, null=True)
 
     class Meta:
         managed = False
-        db_table = 'recipes'
+        db_table = 'recipe'
 
-class Users(models.Model):
+
+class RecipeCategories(models.Model):
+    recipe = models.ForeignKey(Recipe, models.DO_NOTHING)
+    category = models.ForeignKey(Category, models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'recipe_categories'
+
+
+class User(models.Model):
     id = models.BigAutoField(primary_key=True)
     active = models.BooleanField()
-    password_hash = models.CharField(max_length=255, blank=True, null=True)
-    username = models.CharField(unique=True, max_length=255)
+    username = models.CharField(unique=True, max_length=20)
+    password = models.CharField(max_length=20)
 
     class Meta:
         managed = False
-        db_table = 'users'
+        db_table = 'user'
 
-class UserSession(models.Model):
-    user = models.ForeignKey(Users, on_delete=models.CASCADE)
-    session_token = models.CharField(unique=True, max_length=100)
 
-class Category(models.Model):
-    name = models.CharField(unique=True, max_length=255)
-    active = models.BooleanField(default=False)
-    image = models.BinaryField(blank=True, null=True)
+class Session(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    token = models.CharField(unique=True, max_length=36)
+    user_id = models.BigIntegerField()
 
-class CategoryRecipe(models.Model):
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    recipe = models.ForeignKey(Recipes, on_delete=models.CASCADE)
+    class Meta:
+        managed = False
+        db_table = 'session'
 
-class UserFavoriteRecipe(models.Model):
-    user = models.ForeignKey(Users, on_delete=models.CASCADE)
-    recipe = models.ForeignKey(Recipes, on_delete=models.CASCADE)
 
+class UserFavoriteRecipes(models.Model):
+    user = models.ForeignKey(User, models.DO_NOTHING)
+    recipe = models.ForeignKey(Recipe, models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'user_favorite_recipes'
