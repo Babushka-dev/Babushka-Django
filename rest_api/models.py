@@ -47,12 +47,22 @@ class RecipeCategories(models.Model):
 class User(models.Model):
     id = models.BigAutoField(primary_key=True)
     active = models.BooleanField()
-    username = models.CharField(unique=True, max_length=255)
-    password = models.CharField(max_length=255)
+    username = models.CharField(unique=True, max_length=20)
+    password = models.CharField(max_length=20)
 
     class Meta:
         managed = False
         db_table = 'user'
+
+
+class Session(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    token = models.CharField(unique=True, max_length=36)
+    user_id = models.BigIntegerField()
+
+    class Meta:
+        managed = False
+        db_table = 'session'
 
 
 class UserFavoriteRecipes(models.Model):
