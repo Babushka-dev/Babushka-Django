@@ -3,7 +3,7 @@ import secrets
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import Users, UserSession
+from .models import User, Session
 import json
 
 # Utilizamos la libería re (regular expression) para poder crear expresiones regulares
@@ -42,11 +42,11 @@ def create_user(request):
         return JsonResponse({'status': 'error', 'message': 'Password must be at least 6 characters and not more than 20'}, status=400)
 
     # Si el usuario ya existe
-    if Users.objects.filter(username=username).exists():
+    if User.objects.filter(username=username).exists():
         return JsonResponse({'status': 'error', 'message': 'Username already exists'}, status=400)
 
     # Creamos el usuario
-    user = Users.objects.create(username=username, password=password, active=True)
+    user = User.objects.create(username=username, password=password, active=True)
 
     return JsonResponse({'message': 'User registered successfully', 'user_id': user.id}, status=201)
 
@@ -70,19 +70,22 @@ def login_user(request):
 
     # Buscamos entre los users si existe alguno con el nombre de usuario
     try:
-        user = Users.objects.get(username=username)
-    except Users.DoesNotExist: # Si no existe, error
+        user = User.objects.get(username=username)
+    except User.DoesNotExist: # Si no existe, error
         return JsonResponse({'status': 'error', 'message': 'Username does not exist'}, status=401)
 
     # Si existe el username, proseguimos y comprobamos si las contraseñas coinciden; si no coinciden, error
     if user.password != password:
         return JsonResponse({'status': 'error', 'message': 'Passwords do not match'}, status=401)
 
+    # Si el usuario no está activo, devolvemos un código de error.
+    if not user.active:
+        return JsonResponse({'status': 'error', 'message': 'User is not active'}, status=403)
     # generamos un token de 16 bytes que será convertido a hexadecimal
     token = secrets.token_hex(16)
 
     # Creamos la sesión y le asignamos el token
-    session = UserSession.objects.create(user=user, session_token=token)
+    session = Session.objects.create(user_id=user.id, token=token)
 
     # Devolvemos el token de sesión
     return JsonResponse({'sessionToken': token}, status=201)
