@@ -15,6 +15,10 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path
+from rest_api.endpoints import *
 
 urlpatterns = [
+    path("health", health, name="health"),
+    path("recipes", manage_recipe, name="manage_recipe"),
+    path("recipes/<int:id>/image", get_recipe_image, name="get_recipe_image")
 ]
