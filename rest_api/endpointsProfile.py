@@ -125,3 +125,46 @@ def get_favorite_recipes(request, user_id):
         status=200
     )
 
+
+@csrf_exempt
+def get_user_info(request, id):
+    if request.method != 'GET':
+        return JsonResponse(
+            {'status': 'error', 'message': 'Method not allowed'},
+            status=405
+        )
+
+    user = (
+        User.objects
+        .filter(id=id)
+        .annotate(
+            recipes_count=Count('recipe', distinct=True),
+            favorites_count=Count('userfavoriterecipes', distinct=True)
+        )
+        .values(
+            'id',
+            'username',
+            'recipes_count',
+            'favorites_count'
+        )
+        .first()
+    )
+
+    if not user:
+        return JsonResponse(
+            {'status': 'error', 'message': 'User not found'},
+            status=404
+        )
+
+    return JsonResponse(
+        {
+            'status': 'success',
+            'data': {
+                'id': user['id'],
+                'username': user['username'],
+                'recipesCount': user['recipes_count'],
+                'favoriteRecipesCount': user['favorites_count']
+            }
+        },
+        status=200
+    )

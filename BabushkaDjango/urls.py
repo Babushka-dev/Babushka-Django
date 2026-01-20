@@ -28,4 +28,5 @@ urlpatterns = [
     path('sessions', login_user),
     path("recipes/user/<int:user_id>", get_created_recipes),
     path("recipes/favorite/user/<int:user_id>", get_favorite_recipes),
+    path('users/<int:id>/info', get_user_info),
 ]
