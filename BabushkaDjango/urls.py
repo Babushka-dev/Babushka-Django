@@ -17,6 +17,7 @@ Including another URLconf
 
 from rest_api.endpointsRecipe import *
 from rest_api.endpointsUser import *
+from rest_api.endpointsProfile import *
 from django.urls import path
 
 urlpatterns = [
@@ -24,5 +25,7 @@ urlpatterns = [
     path("recipes", manage_recipe),
     path("recipes/<int:id>/image", get_recipe_image),
     path('users', create_user),
-    path('sessions', login_user)
+    path('sessions', login_user),
+    path("recipes/user/<int:user_id>", get_created_recipes),
+    path("recipes/favorite/user/<int:user_id>", get_favorite_recipes),
 ]
