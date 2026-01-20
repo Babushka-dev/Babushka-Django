@@ -14,10 +14,14 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.urls import path
-from rest_api import endpoints
+
+from rest_api.endpoints import *
 
 urlpatterns = [
-    path('users', endpoints.create_user),
-    path('sessions', endpoints.login_user)
+    path("health", health, name="health"),
+    path("recipes", manage_recipe, name="manage_recipe"),
+    path("recipes/<int:id>/image", get_recipe_image, name="get_recipe_image")
+  
+    path('users', create_user),
+    path('sessions', login_user)
 ]
