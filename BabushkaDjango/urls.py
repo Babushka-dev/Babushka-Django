@@ -17,12 +17,14 @@ Including another URLconf
 
 from rest_api.endpointsRecipe import *
 from rest_api.endpointsUser import *
+from rest_api.endpointsCategory import * #Importa todas las funciones que hay en endpointsCategory.py
 from django.urls import path
 
 urlpatterns = [
     path("health", health),
     path("recipes", manage_recipe),
     path("recipes/<int:id>/image", get_recipe_image),
+    path("categories", get_categories), #Devuelve el JSON con las categorías
     path('users', create_user),
-    path('sessions', login_user)
+    path('sessions', login_user),
 ]
