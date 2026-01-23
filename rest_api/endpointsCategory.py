@@ -2,6 +2,7 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import Category
+import base64
 
 #  CREAR CATEGORÍA
 @csrf_exempt
@@ -20,12 +21,13 @@ def create_category(request):
             status=400
         )
 
+    image_base64 = data.get('imageBase64')
     name = data.get('name')
 
-    # Si el nombre está vacío
-    if not name:
+    # Si el nombre o la imagen están vacíos
+    if not name or not image_base64:
         return JsonResponse(
-            {'status': 'error', 'message': 'Missing category name'},
+            {'status': 'error', 'message': 'Missing category name or image'},
             status=400
         )
 
@@ -43,11 +45,20 @@ def create_category(request):
             status=400
         )
 
+    # Procesamos la imagen Base64
+    try:
+        image_bytes = base64.b64decode(image_base64)
+    except Exception:
+        return JsonResponse(
+            {'status': 'error', 'message': 'Invalid imageBase64'},
+            status=400
+        )
+
     # Creamos la categoría (active = True por defecto)
     category = Category.objects.create(
         name=name,
         active=True,
-        image=data.get('image')
+        image=image_bytes
     )
 
     return JsonResponse(
