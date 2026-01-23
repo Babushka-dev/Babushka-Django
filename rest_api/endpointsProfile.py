@@ -165,12 +165,10 @@ def get_user_info(request):
 
 
 def get_user_id_from_token(request):
-    global token
     auth = request.headers.get("Authorization")
     if auth and auth.startswith("Bearer "):
         token = auth.replace("Bearer ", "")
-
-    if not token:
+    else:
         return None
 
     try:
