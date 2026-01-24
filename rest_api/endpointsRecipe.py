@@ -3,7 +3,8 @@ import base64
 
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import Recipe
+from .models import Recipe, RecipeCategories
+
 
 # Función según petición recibida
 @csrf_exempt
@@ -83,6 +84,13 @@ def get_recipes(request):
     search = request.GET.get('search')
     if search:
         recipes = recipes.filter(title__icontains=search)
+
+    # Filtro por categoría
+    category_id = request.GET.get('category')
+    if category_id:
+        if not str(category_id).isdigit():
+            return JsonResponse( {'status': 'error', 'message': 'category must be an integer'}, status=400)
+        recipes = recipes.filter(recipescategories__category_id = category_id)
 
     # Leemos parámetros opcionales
     page = request.GET.get('page')
