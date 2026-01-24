@@ -86,11 +86,11 @@ def get_recipes(request):
         recipes = recipes.filter(title__icontains=search)
 
     # Filtro por categoría
-    category_id = request.GET.get('category')
+    category_id = request.GET.get('categoryId')
     if category_id:
         if not str(category_id).isdigit():
             return JsonResponse( {'status': 'error', 'message': 'category must be an integer'}, status=400)
-        recipes = recipes.filter(recipescategories__category_id = category_id)
+        recipes = recipes.filter(recipecategories__category_id = category_id)
 
     # Leemos parámetros opcionales
     page = request.GET.get('page')
