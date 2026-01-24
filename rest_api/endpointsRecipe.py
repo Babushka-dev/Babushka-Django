@@ -3,7 +3,9 @@ import base64
 
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import Recipe
+
+from .helpers import get_user_id_from_token
+from .models import Recipe, UserFavoriteRecipes
 
 
 # Función según petición recibida
@@ -114,6 +116,13 @@ def get_recipes(request):
         end = start + size
         recipes = recipes[start:end]
 
+    # Sacar userId del usuario
+    user_id = get_user_id_from_token(request)
+    favorites = []
+    if user_id:
+        # Recibir recetas favoritas de userId
+        favorites = UserFavoriteRecipes.objects.filter(user_id=user_id)
+
     # Convertimos las recetas a lista de diccionarios
     data = []
     for recipe in recipes:
@@ -124,7 +133,7 @@ def get_recipes(request):
             'ingredients': recipe.ingredients,
             'preparation': recipe.preparation,
             'difficulty': recipe.difficulty,
-            'userId': recipe.user.id if recipe.user else None
+            'isFavorite': recipe in favorites, # Comprobar si receta está en el array
         })
     return JsonResponse({'status': 'success', 'count': len(data), 'data': data}, status=200)
 
