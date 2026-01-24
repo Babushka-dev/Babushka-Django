@@ -121,7 +121,7 @@ def get_recipes(request):
     favorites = []
     if user_id:
         # Recibir recetas favoritas de userId
-        favorites = UserFavoriteRecipes.objects.filter(user_id=user_id)
+        favorites = Recipe.objects.filter(userfavoriterecipes__user_id=user_id)
 
     # Convertimos las recetas a lista de diccionarios
     data = []
