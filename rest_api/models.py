@@ -66,6 +66,7 @@ class Session(models.Model):
 
 
 class UserFavoriteRecipes(models.Model):
+    id = models.BigAutoField(primary_key=True)
     user = models.ForeignKey(User, models.DO_NOTHING)
     recipe = models.ForeignKey(Recipe, models.DO_NOTHING)
 
