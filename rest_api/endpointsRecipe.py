@@ -3,7 +3,7 @@ import base64
 
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import Recipe, RecipeCategories
+from .models import Recipe
 
 
 # Función según petición recibida

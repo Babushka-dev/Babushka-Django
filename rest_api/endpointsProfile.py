@@ -1,7 +1,8 @@
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from .models import Recipe, UserFavoriteRecipes, User, Session
+from .helpers import get_user_id_from_token
+from .models import Recipe, UserFavoriteRecipes, User
 
 from django.db.models import Exists, OuterRef, Value, BooleanField, Count
 from django.db.models.functions import Coalesce
@@ -162,18 +163,3 @@ def get_user_info(request):
         },
         status=200
     )
-
-
-def get_user_id_from_token(request):
-    auth = request.headers.get("Authorization")
-    if auth and auth.startswith("Bearer "):
-        token = auth.replace("Bearer ", "")
-    else:
-        return None
-
-    try:
-        session = Session.objects.get(token=token)
-    except Session.DoesNotExist:
-        return None
-
-    return session.user_id
