@@ -36,6 +36,7 @@ class Recipe(models.Model):
 
 
 class RecipeCategories(models.Model):
+    id = models.BigAutoField(primary_key=True)
     recipe = models.ForeignKey(Recipe, models.DO_NOTHING)
     category = models.ForeignKey(Category, models.DO_NOTHING)
 
