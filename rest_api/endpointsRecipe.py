@@ -24,6 +24,10 @@ def create_recipe(request):
     except json.JSONDecodeError:
         return JsonResponse({'status': 'error', 'message': 'Invalid JSON'}, status=400)
 
+    user_id = get_user_id_from_token(request)
+    if not user_id:
+        return JsonResponse({'status': 'error', 'message': 'Invalid or missing token'}, status=401)
+
     # Extraemos información del JSON
     title = data.get('title')
     description = data.get('description')
@@ -56,6 +60,7 @@ def create_recipe(request):
         ingredients=ingredients,
         preparation=preparation,
         difficulty=difficulty,
+        user_id=user_id,
         active=True
     )
 
@@ -133,7 +138,7 @@ def get_recipes(request):
             'ingredients': recipe.ingredients,
             'preparation': recipe.preparation,
             'difficulty': recipe.difficulty,
-            'isFavorite': recipe in favorites, # Comprobar si receta está en el array
+            'isFavorite': recipe in favorites, # Comprobar si receta está en el array (en boleeano)
         })
     return JsonResponse({'status': 'success', 'count': len(data), 'data': data}, status=200)
 
