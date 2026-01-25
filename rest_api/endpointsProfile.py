@@ -38,7 +38,7 @@ def get_created_recipes(request):
         Recipe.objects
         .filter(active=True, user_id=user_id)
         .annotate(
-            is_favorite=Coalesce(
+            isFavorite=Coalesce(
                 Exists(favorites_subquery),
                 Value(False),
                 output_field=BooleanField()
@@ -52,7 +52,7 @@ def get_created_recipes(request):
             'preparation',
             'time',
             'difficulty',
-            'is_favorite'
+            'isFavorite'
         )
     )
 
@@ -97,7 +97,7 @@ def get_favorite_recipes(request):
             userfavoriterecipes__user_id=user_id
         )
         .annotate(
-            is_favorite=Value(True, output_field=BooleanField())
+            isFavorite=Value(True, output_field=BooleanField())
         )
         .values(
             'id',
@@ -107,7 +107,7 @@ def get_favorite_recipes(request):
             'preparation',
             'time',
             'difficulty',
-            'is_favorite'
+            'isFavorite'
         )
     )
 
