@@ -50,6 +50,7 @@ def get_created_recipes(request):
             'description',
             'ingredients',
             'preparation',
+            'time',
             'difficulty',
             'is_favorite'
         )
@@ -104,6 +105,7 @@ def get_favorite_recipes(request):
             'description',
             'ingredients',
             'preparation',
+            'time',
             'difficulty',
             'is_favorite'
         )
