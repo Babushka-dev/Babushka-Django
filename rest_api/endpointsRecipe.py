@@ -35,10 +35,16 @@ def create_recipe(request):
     preparation = data.get('preparation')
     difficulty = data.get('difficulty')
     image_base64 = data.get('imageBase64')
+    time = data.get('time')
 
     # Si title y difficulty están vacíos
-    if not title or difficulty is None:
-        return JsonResponse({'status': 'error', 'message': 'Title and difficulty are required'}, status=400)
+    if not title or difficulty or time is None:
+        return JsonResponse({'status': 'error', 'message': 'Title, difficulty and time are required'}, status=400)
+
+    # Si time no es integer
+    if not str(time).isdigit():
+        return JsonResponse({'status': 'error', 'message': 'Time must be an integer'}, status=400)
+    time = int(time)
 
     # Si difficulty no es integer
     if not str(difficulty).isdigit():
@@ -59,6 +65,7 @@ def create_recipe(request):
         description=description,
         ingredients=ingredients,
         preparation=preparation,
+        time=time,
         difficulty=difficulty,
         user_id=user_id,
         active=True
@@ -137,6 +144,7 @@ def get_recipes(request):
             'description': recipe.description,
             'ingredients': recipe.ingredients,
             'preparation': recipe.preparation,
+            'time': recipe.time,
             'difficulty': recipe.difficulty,
             'isFavorite': recipe in favorites, # Comprobar si receta está en el array (en boleeano)
         })
