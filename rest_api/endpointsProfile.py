@@ -13,13 +13,13 @@ def get_created_recipes(request):
     if not user_id:
         return JsonResponse({'status': 'error', 'message': 'Invalid or missing token'}, status=401)
 
-    recipes = Recipe.objects.filter(active=True, user_id=user_id)
+    recipes = Recipe.objects.filter(active=True, user_id=user_id) # Recetas creadas por usuario
 
     pg = use_page_system(request, recipes)
     if 0 in pg:
-        return pg.get(0)
+        return pg.get(0) # Recibir cuerpo del error
     else:
-        recipes = pg.get(1)
+        recipes = pg.get(1) # Recibe todas recetas con paginación
 
     favorites = Recipe.objects.filter(userfavoriterecipes__user_id=user_id)
 

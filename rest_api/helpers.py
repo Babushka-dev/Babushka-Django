@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from .models import Session
 
 def get_user_id_from_token(request):
-    auth = request.headers.get("Authorization")
+    auth = request.headers.get("Authorization") # Sacamos token
     if auth and auth.startswith("Bearer "):
         token = auth.replace("Bearer ", "")
     else:
@@ -34,6 +34,7 @@ def use_page_system(request, recipes):
         if page < 0:
             return {0 : JsonResponse({'status': 'error', 'message': 'page must be greater than 0'}, status=400)}
 
+        # Clave de la paginación
         start = page * size
         end = start + size
         recipes = recipes[start:end]

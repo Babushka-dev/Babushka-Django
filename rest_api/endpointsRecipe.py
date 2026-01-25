@@ -4,7 +4,7 @@ import base64
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from .helpers import get_user_id_from_token
+from .helpers import get_user_id_from_token, use_page_system
 from .models import Recipe, UserFavoriteRecipes
 
 
@@ -106,27 +106,11 @@ def get_recipes(request):
             return JsonResponse( {'status': 'error', 'message': 'category must be an integer'}, status=400)
         recipes = recipes.filter(recipecategories__category_id = category_id)
 
-    # Leemos parámetros opcionales
-    page = request.GET.get('page')
-    size = request.GET.get('size')
-
-    # Si vienen page y size, aplicamos paginación
-    if page is not None and size is not None:
-        try:
-            page = int(page)
-            size = int(size)
-        except Exception:
-            return JsonResponse({'status': 'error', 'message': 'page and size must be integers'}, status=400)
-
-        if size <= 0:
-            return JsonResponse({'status': 'error', 'message': 'size must be greater than 0'}, status=400)
-        if page < 0:
-            return JsonResponse({'status': 'error', 'message': 'page must be greater than 0'}, status=400)
-
-        # Clave de la paginación
-        start = page * size
-        end = start + size
-        recipes = recipes[start:end]
+    pg = use_page_system(request, recipes)
+    if 0 in pg:
+        return pg.get(0)  # Recibir cuerpo del error
+    else:
+        recipes = pg.get(1)  # Recibe todas recetas con paginación
 
     # Sacar userId del usuario
     user_id = get_user_id_from_token(request)
