@@ -134,33 +134,18 @@ def get_user_info(request):
     if not user_id:
         return JsonResponse({'status': 'error', 'message': 'Invalid or missing token'}, status=401)
 
-    user = (
-        User.objects
-        .filter(id=user_id)
-        .annotate(
-            recipes_count=Count('recipe', distinct=True),
-            favorites_count=Count('userfavoriterecipes', distinct=True)
-        )
-        .values(
-            'id',
-            'username',
-            'recipes_count',
-            'favorites_count'
-        )
-        .first()
-    )
-
-    if not user:
-        return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
+    recipes = Recipe.objects.filter(user_id=user_id)
+    favRecipes = Recipe.objects.filter(userfavoriterecipes__user_id=user_id)
+    user = User.objects.get(id=user_id)
 
     return JsonResponse(
         {
             'status': 'success',
             'data': {
-                'id': user['id'],
-                'username': user['username'],
-                'recipesCount': user['recipes_count'],
-                'favoriteRecipesCount': user['favorites_count']
+                'id': user.id,
+                'username': user.username,
+                'countCreatedRecipe': recipes.count(),
+                'countFavoriteRecipe': favRecipes.count(),
             }
         },
         status=200
