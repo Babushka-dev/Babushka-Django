@@ -29,6 +29,7 @@ class Recipe(models.Model):
     preparation = models.CharField(max_length=1000, blank=True, null=True)
     title = models.CharField(max_length=25)
     user = models.ForeignKey('User', models.DO_NOTHING, blank=True, null=True)
+    time = models.IntegerField()
 
     class Meta:
         managed = False
