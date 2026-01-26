@@ -74,10 +74,10 @@ def create_recipe(request):
         active=True
     )
 
-    # Procesamos la imagen Base64
+    # Procesamos imagen_base64
     if image_base64:
         if image_base64.startswith('data:image/jpeg;base64,'):
-            image_base64 = image_base64.replace("data:image/jpeg;base64, ", "")
+            image_base64 = image_base64.replace("data:image/jpeg;base64,", "")
         try:
             recipe.image = base64.b64decode(image_base64)
         except Exception:
@@ -111,7 +111,7 @@ def get_recipes(request):
             return JsonResponse( {'status': 'error', 'message': 'category must be an integer'}, status=400)
         recipes = recipes.filter(recipecategories__category_id = category_id)
 
-    pg = use_page_system(request, recipes)
+    pg = use_page_system(request, recipes) # Para paginación
     if 0 in pg:
         return pg.get(0)  # Recibir cuerpo del error
     else:
@@ -139,7 +139,6 @@ def get_recipes(request):
         })
     return JsonResponse({'status': 'success', 'count': len(data), 'data': data}, status=200)
 
-
 @csrf_exempt
 def get_recipe_image(request, id):
     # Solo GET
@@ -147,12 +146,11 @@ def get_recipe_image(request, id):
         return JsonResponse({'status': 'error', 'message': 'Method not allowed'}, status=405)
 
     # Buscamos la receta activa por id
-    recipe = Recipe.objects.filter(id=id, active=True).first()
+    recipe = Recipe.objects.filter(active=True,id=id).first()
 
+    # Si exite receta / Si esta tiene imagen
     if not recipe:
         return JsonResponse({'status': 'error', 'message': 'Recipe not found'}, status=404)
-
-    # Si no tiene imagen
     if not recipe.image:
         return JsonResponse({'status': 'error', 'message': 'Recipe has no image'}, status=404)
 
