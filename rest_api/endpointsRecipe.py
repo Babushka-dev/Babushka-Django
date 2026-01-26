@@ -59,8 +59,8 @@ def create_recipe(request):
         return JsonResponse({'status': 'error', 'message': 'Difficulty must be between 1 and 5'}, status=400)
 
     # Si title tiene más de 25 caracteres
-    if len(title) > 25:
-        return JsonResponse({'status': 'error', 'message': 'Title cannot exceed 25 characters'}, status=400)
+    if len(title) > 50:
+        return JsonResponse({'status': 'error', 'message': 'Title cannot exceed 50 characters'}, status=400)
 
     # Creamos la receta (sin guardar)
     recipe = Recipe(
