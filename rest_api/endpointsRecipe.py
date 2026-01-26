@@ -58,7 +58,7 @@ def create_recipe(request):
     if difficulty < 1 or difficulty > 5:
         return JsonResponse({'status': 'error', 'message': 'Difficulty must be between 1 and 5'}, status=400)
 
-    # Si title tiene más de 25 caracteres
+    # Si title tiene más de 50 caracteres
     if len(title) > 50:
         return JsonResponse({'status': 'error', 'message': 'Title cannot exceed 50 characters'}, status=400)
 
@@ -76,6 +76,8 @@ def create_recipe(request):
 
     # Procesamos la imagen Base64
     if image_base64:
+        if image_base64.startswith('data:image/jpeg;base64,'):
+            image_base64 = image_base64.replace("data:image/jpeg;base64, ", "")
         try:
             recipe.image = base64.b64decode(image_base64)
         except Exception:
