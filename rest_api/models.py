@@ -10,9 +10,9 @@ from django.db import models
 
 class Category(models.Model):
     id = models.BigAutoField(primary_key=True)
-    active = models.BooleanField()
-    image = models.BinaryField(blank=True, null=True)
     name = models.CharField(max_length=25)
+    image = models.BinaryField(blank=True, null=True)
+    active = models.BooleanField()
 
     class Meta:
         managed = False
@@ -21,15 +21,15 @@ class Category(models.Model):
 
 class Recipe(models.Model):
     id = models.BigAutoField(primary_key=True)
-    active = models.BooleanField()
+    title = models.CharField(max_length=50)
     description = models.CharField(max_length=100, blank=True, null=True)
+    preparation = models.CharField(max_length=1000, blank=True, null=True)
+    ingredients = models.CharField(max_length=1000, blank=True, null=True)
+    time = models.IntegerField()
     difficulty = models.IntegerField()
     image = models.BinaryField(blank=True, null=True)
-    ingredients = models.CharField(max_length=1000, blank=True, null=True)
-    preparation = models.CharField(max_length=1000, blank=True, null=True)
-    title = models.CharField(max_length=50)
     user = models.ForeignKey('User', models.DO_NOTHING, blank=True, null=True)
-    time = models.IntegerField()
+    active = models.BooleanField()
 
     class Meta:
         managed = False
@@ -48,9 +48,9 @@ class RecipeCategories(models.Model):
 
 class User(models.Model):
     id = models.BigAutoField(primary_key=True)
-    active = models.BooleanField()
     username = models.CharField(unique=True, max_length=20)
     password = models.CharField(max_length=20)
+    active = models.BooleanField()
 
     class Meta:
         managed = False
