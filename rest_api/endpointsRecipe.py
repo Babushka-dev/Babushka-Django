@@ -76,7 +76,7 @@ def create_recipe(request):
 
     # Procesamos imagen_base64
     if image_base64:
-        if image_base64.startswith('data:image/jpeg;base64,'):
+        if image_base64.startswith('data:image/jpeg;base64,'): # Eliminamos intro de image64 (porque es irrelevante)
             image_base64 = image_base64.replace("data:image/jpeg;base64,", "")
         try:
             recipe.image = base64.b64decode(image_base64)
