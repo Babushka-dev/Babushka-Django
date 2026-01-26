@@ -77,7 +77,7 @@ def create_recipe(request):
     # Procesamos la imagen Base64
     if image_base64:
         if image_base64.startswith('data:image/jpeg;base64,'):
-            image_base64 = image_base64.replace("data:image/jpeg;base64, ", "")
+            image_base64 = image_base64.replace("data:image/jpeg;base64,", "")
         try:
             recipe.image = base64.b64decode(image_base64)
         except Exception:
