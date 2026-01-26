@@ -9,11 +9,13 @@ def get_created_recipes(request):
     if request.method != 'GET':
         return JsonResponse({'status': 'error', 'message': 'Method not allowed'}, status=405)
 
+    # Sacar user_id del token
     user_id = get_user_id_from_token(request)
     if not user_id:
         return JsonResponse({'status': 'error', 'message': 'Invalid or missing token'}, status=401)
 
-    recipes = Recipe.objects.filter(active=True, user_id=user_id) # Recetas creadas por usuario
+    # Todas recetas creadas por usuario
+    recipes = Recipe.objects.filter(active=True, user_id=user_id)
 
     pg = use_page_system(request, recipes)
     if 0 in pg:
@@ -21,6 +23,7 @@ def get_created_recipes(request):
     else:
         recipes = pg.get(1) # Recibe todas recetas con paginación
 
+    # Todas recetas favoritas del usuario
     favorites = Recipe.objects.filter(userfavoriterecipes__user_id=user_id)
 
     data = []
@@ -42,10 +45,12 @@ def get_favorite_recipes(request):
     if request.method != 'GET':
         return JsonResponse({'status': 'error', 'message': 'Method not allowed'}, status=405)
 
+    # Sacar user_id del token
     user_id = get_user_id_from_token(request)
     if not user_id:
         return JsonResponse({'status': 'error', 'message': 'Invalid or missing token'}, status=401)
 
+    # Todas recetas favoritas del usuario
     recipes = Recipe.objects.filter(active=True, userfavoriterecipes__user_id=user_id)
 
     pg = use_page_system(request, recipes)
@@ -73,12 +78,18 @@ def get_user_info(request):
     if request.method != 'GET':
         return JsonResponse({'status': 'error', 'message': 'Method not allowed'}, status=405)
 
+    # Sacar user_id del token
     user_id = get_user_id_from_token(request)
     if not user_id:
         return JsonResponse({'status': 'error', 'message': 'Invalid or missing token'}, status=401)
 
+    # Todas recetas creadas por usuario
     recipes = Recipe.objects.filter(active=True, user_id=user_id)
+
+    # Todas recetas favoritas del usuario
     favRecipes = Recipe.objects.filter(active=True, userfavoriterecipes__user_id=user_id)
+
+    # Recibir usuario utilizando id
     user = User.objects.get(id=user_id)
 
     return JsonResponse(
