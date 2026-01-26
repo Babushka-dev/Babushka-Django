@@ -1,179 +1,106 @@
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from .models import Recipe, UserFavoriteRecipes, User, Session
-
-from django.db.models import Exists, OuterRef, Value, BooleanField, Count
-from django.db.models.functions import Coalesce
-
+from .helpers import get_user_id_from_token, use_page_system
+from .models import Recipe, User
 
 @csrf_exempt
 def get_created_recipes(request):
     if request.method != 'GET':
         return JsonResponse({'status': 'error', 'message': 'Method not allowed'}, status=405)
 
+    # Sacar user_id del token
     user_id = get_user_id_from_token(request)
     if not user_id:
         return JsonResponse({'status': 'error', 'message': 'Invalid or missing token'}, status=401)
 
-    page = request.GET.get('page', 0)
-    size = request.GET.get('size', 6)
+    # Todas recetas creadas por usuario
+    recipes = Recipe.objects.filter(active=True, user_id=user_id)
 
-    try:
-        page = int(page)
-        size = int(size)
-    except ValueError:
-        return JsonResponse({'status': 'error', 'message': 'page, size and userIdFav must be integers'}, status=400)
+    pg = use_page_system(request, recipes)
+    if 0 in pg:
+        return pg.get(0) # Recibir cuerpo del error
+    else:
+        recipes = pg.get(1) # Recibe todas recetas con paginación
 
-    if page < 0 or size <= 0:
-        return JsonResponse({'status': 'error', 'message': 'Invalid page or size'}, status=400)
+    # Todas recetas favoritas del usuario
+    favorites = Recipe.objects.filter(userfavoriterecipes__user_id=user_id)
 
-    favorites_subquery = UserFavoriteRecipes.objects.filter(
-        user_id=user_id,
-        recipe_id=OuterRef('pk')
-    )
-
-    recipes_qs = (
-        Recipe.objects
-        .filter(active=True, user_id=user_id)
-        .annotate(
-            is_favorite=Coalesce(
-                Exists(favorites_subquery),
-                Value(False),
-                output_field=BooleanField()
-            )
-        )
-        .values(
-            'id',
-            'title',
-            'description',
-            'ingredients',
-            'preparation',
-            'difficulty',
-            'is_favorite'
-        )
-    )
-
-    start = page * size
-    end = start + size
-    data = list(recipes_qs[start:end])
-
-    return JsonResponse(
-        {
-            'status': 'success',
-            'count': len(data),
-            'data': data
-        },
-        status=200
-    )
+    data = []
+    for recipe in recipes:
+        data.append({
+            'id': recipe.id,
+            'title': recipe.title,
+            'description': recipe.description,
+            'ingredients': recipe.ingredients,
+            'preparation': recipe.preparation,
+            'time': recipe.time,
+            'difficulty': recipe.difficulty,
+            'isFavorite': recipe in favorites # Si receta está en el array favorites = receta es favorita (Tipo boolean)
+        })
+    return JsonResponse({'status': 'success', 'count': len(data), 'data': data}, status=200)
 
 @csrf_exempt
 def get_favorite_recipes(request):
     if request.method != 'GET':
         return JsonResponse({'status': 'error', 'message': 'Method not allowed'}, status=405)
 
+    # Sacar user_id del token
     user_id = get_user_id_from_token(request)
     if not user_id:
         return JsonResponse({'status': 'error', 'message': 'Invalid or missing token'}, status=401)
 
-    page = request.GET.get('page', 0)
-    size = request.GET.get('size', 6)
+    # Todas recetas favoritas del usuario
+    recipes = Recipe.objects.filter(active=True, userfavoriterecipes__user_id=user_id)
 
-    try:
-        page = int(page)
-        size = int(size)
-    except ValueError:
-        return JsonResponse({'status': 'error', 'message': 'page and size must be integers'}, status=400)
+    pg = use_page_system(request, recipes)
+    if 0 in pg:
+        return pg.get(0)
+    else:
+        recipes = pg.get(1)
 
-    if page < 0 or size <= 0:
-        return JsonResponse({'status': 'error', 'message': 'Invalid page or size'}, status=400)
-
-    recipes_qs = (
-        Recipe.objects
-        .filter(
-            active=True,
-            userfavoriterecipes__user_id=user_id
-        )
-        .annotate(
-            is_favorite=Value(True, output_field=BooleanField())
-        )
-        .values(
-            'id',
-            'title',
-            'description',
-            'ingredients',
-            'preparation',
-            'difficulty',
-            'is_favorite'
-        )
-    )
-
-    start = page * size
-    end = start + size
-    data = list(recipes_qs[start:end])
-
-    return JsonResponse(
-        {
-            'status': 'success',
-            'count': len(data),
-            'data': data
-        },
-        status=200
-    )
-
+    data = []
+    for recipe in recipes:
+        data.append({
+            'id': recipe.id,
+            'title': recipe.title,
+            'description': recipe.description,
+            'ingredients': recipe.ingredients,
+            'preparation': recipe.preparation,
+            'time': recipe.time,
+            'difficulty': recipe.difficulty,
+            'isFavorite': True # Todas recetas son favoritas
+        })
+    return JsonResponse({'status': 'success', 'count': len(data), 'data': data}, status=200)
 
 @csrf_exempt
 def get_user_info(request):
     if request.method != 'GET':
         return JsonResponse({'status': 'error', 'message': 'Method not allowed'}, status=405)
 
+    # Sacar user_id del token
     user_id = get_user_id_from_token(request)
     if not user_id:
         return JsonResponse({'status': 'error', 'message': 'Invalid or missing token'}, status=401)
 
-    user = (
-        User.objects
-        .filter(id=user_id)
-        .annotate(
-            recipes_count=Count('recipe', distinct=True),
-            favorites_count=Count('userfavoriterecipes', distinct=True)
-        )
-        .values(
-            'id',
-            'username',
-            'recipes_count',
-            'favorites_count'
-        )
-        .first()
-    )
+    # Todas recetas creadas por usuario
+    recipes = Recipe.objects.filter(active=True, user_id=user_id)
 
-    if not user:
-        return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
+    # Todas recetas favoritas del usuario
+    favRecipes = Recipe.objects.filter(active=True, userfavoriterecipes__user_id=user_id)
+
+    # Recibir usuario utilizando id
+    user = User.objects.get(id=user_id)
 
     return JsonResponse(
         {
             'status': 'success',
             'data': {
-                'id': user['id'],
-                'username': user['username'],
-                'recipesCount': user['recipes_count'],
-                'favoriteRecipesCount': user['favorites_count']
+                'id': user.id,
+                'username': user.username,
+                'countCreatedRecipe': recipes.count(),
+                'countFavoriteRecipe': favRecipes.count(),
             }
         },
         status=200
     )
-
-
-def get_user_id_from_token(request):
-    auth = request.headers.get("Authorization")
-    if auth and auth.startswith("Bearer "):
-        token = auth.replace("Bearer ", "")
-    else:
-        return None
-
-    try:
-        session = Session.objects.get(token=token)
-    except Session.DoesNotExist:
-        return None
-
-    return session.user_id

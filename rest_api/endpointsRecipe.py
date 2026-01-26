@@ -3,6 +3,8 @@ import base64
 
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+
+from .helpers import get_user_id_from_token, use_page_system
 from .models import Recipe
 
 # Función según petición recibida
@@ -21,6 +23,10 @@ def create_recipe(request):
     except json.JSONDecodeError:
         return JsonResponse({'status': 'error', 'message': 'Invalid JSON'}, status=400)
 
+    user_id = get_user_id_from_token(request)
+    if not user_id:
+        return JsonResponse({'status': 'error', 'message': 'Invalid or missing token'}, status=401)
+
     # Extraemos información del JSON
     title = data.get('title')
     description = data.get('description')
@@ -28,10 +34,20 @@ def create_recipe(request):
     preparation = data.get('preparation')
     difficulty = data.get('difficulty')
     image_base64 = data.get('imageBase64')
+    time = data.get('time')
 
-    # Si title y difficulty están vacíos
-    if not title or difficulty is None:
-        return JsonResponse({'status': 'error', 'message': 'Title and difficulty are required'}, status=400)
+    # Si title, difficulty o time están vacíos
+    if not title:
+        return JsonResponse({'status': 'error', 'message': 'Title is required'}, status=400)
+    if not difficulty:
+        return JsonResponse({'status': 'error', 'message': 'Difficulty is required'}, status=400)
+    if not time:
+        return JsonResponse({'status': 'error', 'message': 'Time is required'}, status=400)
+
+    # Si time no es integer
+    if not str(time).isdigit():
+        return JsonResponse({'status': 'error', 'message': 'Time must be an integer'}, status=400)
+    time = int(time)
 
     # Si difficulty no es integer
     if not str(difficulty).isdigit():
@@ -42,8 +58,8 @@ def create_recipe(request):
     if difficulty < 1 or difficulty > 5:
         return JsonResponse({'status': 'error', 'message': 'Difficulty must be between 1 and 5'}, status=400)
 
-    # Si title tiene más de 25 caracteres
-    if len(title) > 25:
+    # Si title tiene más de 50 caracteres
+    if len(title) > 50:
         return JsonResponse({'status': 'error', 'message': 'Title cannot exceed 50 characters'}, status=400)
 
     # Creamos la receta (sin guardar)
@@ -52,12 +68,16 @@ def create_recipe(request):
         description=description,
         ingredients=ingredients,
         preparation=preparation,
+        time=time,
         difficulty=difficulty,
+        user_id=user_id,
         active=True
     )
 
-    # Procesamos la imagen Base64
+    # Procesamos imagen_base64
     if image_base64:
+        if image_base64.startswith('data:image/jpeg;base64,'): # Eliminamos intro de image64 (porque es irrelevante)
+            image_base64 = image_base64.replace("data:image/jpeg;base64,", "")
         try:
             recipe.image = base64.b64decode(image_base64)
         except Exception:
@@ -84,27 +104,25 @@ def get_recipes(request):
     if search:
         recipes = recipes.filter(title__icontains=search)
 
-    # Leemos parámetros opcionales
-    page = request.GET.get('page')
-    size = request.GET.get('size')
+    # Filtro por categoría
+    category_id = request.GET.get('categoryId')
+    if category_id:
+        if not str(category_id).isdigit():
+            return JsonResponse( {'status': 'error', 'message': 'category must be an integer'}, status=400)
+        recipes = recipes.filter(recipecategories__category_id = category_id)
 
-    # Si vienen page y size, aplicamos paginación
-    if page is not None and size is not None:
-        try:
-            page = int(page)
-            size = int(size)
-        except Exception:
-            return JsonResponse({'status': 'error', 'message': 'page and size must be integers'}, status=400)
+    pg = use_page_system(request, recipes) # Para paginación
+    if 0 in pg:
+        return pg.get(0)  # Recibir cuerpo del error
+    else:
+        recipes = pg.get(1)  # Recibe todas recetas con paginación
 
-        if size <= 0:
-            return JsonResponse({'status': 'error', 'message': 'size must be greater than 0'}, status=400)
-        if page < 0:
-            return JsonResponse({'status': 'error', 'message': 'page must be greater than 0'}, status=400)
-
-        # Clave de la paginación
-        start = page * size
-        end = start + size
-        recipes = recipes[start:end]
+    # Sacar userId del usuario
+    user_id = get_user_id_from_token(request)
+    favorites = []
+    if user_id:
+        # Recibir recetas favoritas de userId
+        favorites = Recipe.objects.filter(userfavoriterecipes__user_id=user_id)
 
     # Convertimos las recetas a lista de diccionarios
     data = []
@@ -115,25 +133,24 @@ def get_recipes(request):
             'description': recipe.description,
             'ingredients': recipe.ingredients,
             'preparation': recipe.preparation,
+            'time': recipe.time,
             'difficulty': recipe.difficulty,
-            'userId': recipe.user.id if recipe.user else None
+            'isFavorite': recipe in favorites, # Comprobar si receta está en el array (en boleeano)
         })
     return JsonResponse({'status': 'success', 'count': len(data), 'data': data}, status=200)
 
-
 @csrf_exempt
 def get_recipe_image(request, id):
-    # Solo GET
+    # Solo recibe peticiones GET
     if request.method != 'GET':
         return JsonResponse({'status': 'error', 'message': 'Method not allowed'}, status=405)
 
     # Buscamos la receta activa por id
-    recipe = Recipe.objects.filter(id=id, active=True).first()
+    recipe = Recipe.objects.filter(active=True,id=id).first()
 
+    # Si exite receta / Si esta tiene imagen
     if not recipe:
         return JsonResponse({'status': 'error', 'message': 'Recipe not found'}, status=404)
-
-    # Si no tiene imagen
     if not recipe.image:
         return JsonResponse({'status': 'error', 'message': 'Recipe has no image'}, status=404)
 

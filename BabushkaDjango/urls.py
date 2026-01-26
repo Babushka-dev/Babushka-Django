@@ -27,8 +27,8 @@ urlpatterns = [
     path("recipes/<int:id>/image", get_recipe_image),
     path('users', create_user),
     path('sessions', login_user),
-    path('users/me/recipes/', get_created_recipes),
-    path('users/me/favorites/', get_favorite_recipes),
-    path('users/me/info/', get_user_info),
+    path('users/me/recipes', get_created_recipes),
+    path('users/me/favorites', get_favorite_recipes),
+    path('users/me/info', get_user_info),
     path('categories', create_category),
 ]
