@@ -5,8 +5,7 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from .helpers import get_user_id_from_token, use_page_system
-from .models import Recipe, UserFavoriteRecipes
-
+from .models import Recipe
 
 # Función según petición recibida
 @csrf_exempt
@@ -37,9 +36,13 @@ def create_recipe(request):
     image_base64 = data.get('imageBase64')
     time = data.get('time')
 
-    # Si title y difficulty están vacíos
-    if not title or difficulty or time is None:
-        return JsonResponse({'status': 'error', 'message': 'Title, difficulty and time are required'}, status=400)
+    # Si title, difficulty o time están vacíos
+    if not title:
+        return JsonResponse({'status': 'error', 'message': 'Title is required'}, status=400)
+    if not difficulty:
+        return JsonResponse({'status': 'error', 'message': 'Difficulty is required'}, status=400)
+    if not time:
+        return JsonResponse({'status': 'error', 'message': 'Time is required'}, status=400)
 
     # Si time no es integer
     if not str(time).isdigit():
@@ -57,7 +60,7 @@ def create_recipe(request):
 
     # Si title tiene más de 25 caracteres
     if len(title) > 25:
-        return JsonResponse({'status': 'error', 'message': 'Title cannot exceed 50 characters'}, status=400)
+        return JsonResponse({'status': 'error', 'message': 'Title cannot exceed 25 characters'}, status=400)
 
     # Creamos la receta (sin guardar)
     recipe = Recipe(
