@@ -141,7 +141,7 @@ def get_recipes(request):
 
 @csrf_exempt
 def get_recipe_image(request, id):
-    # Solo GET
+    # Solo recibe peticiones GET
     if request.method != 'GET':
         return JsonResponse({'status': 'error', 'message': 'Method not allowed'}, status=405)
 
