@@ -1,6 +1,7 @@
 import base64 #Importa una librería de Python que sirve para convertir datos binarios (bytes) en texto (Base64)
               #La necesitamos porque cat.image es binario y JSON no puede enviar binarios
-from django.http import JsonResponse #Importa la clase que permite devolver respuestas HTTP en formato JSON desde Django
+from django.http import JsonResponse, \
+    HttpResponse  # Importa la clase que permite devolver respuestas HTTP en formato JSON desde Django
 from .models import Category #Importa el modelo Category para poder leer las categorías de la base de datos
 
 
@@ -23,8 +24,30 @@ def get_categories(request): #Define una función que Django usará como endpoin
         data.append({ #Añadimos un nuevo elemento a la lista "data"
             "id": cat.id, #Id de la categoría
             "name": cat.name, #Nombre de la categoría
-            "imageBase64": image_base64 #Imagen de la categoría convertida a Base64
         })
 
     return JsonResponse(data, safe=False) #Devuelve la lista data como respuesta JSON HTTP
     #Con safe=False le indicamos que, aunque sea una lista en vez de un objeto, lo devuelva igualmente
+
+
+
+
+def get_category_image(request, category_id):
+    # Busca la categoría en la base de datos usando su ID
+    try:
+        category = Category.objects.get(id=category_id)
+    except Category.DoesNotExist:
+        # Si no existe, devuelve un error 404 en formato JSON
+        return JsonResponse({"error": "Not found"}, status=404)
+
+    # Comprueba si la categoría tiene imagen
+    if not category.image:
+        # Si no tiene imagen, devuelve otro error 404
+        return JsonResponse({"error": "No image"}, status=404)
+
+
+    # Devuelve la imagen como respuesta HTTP
+    return HttpResponse(category.image, content_type='image/jpeg')
+
+
+
