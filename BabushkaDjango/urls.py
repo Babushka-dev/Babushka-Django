@@ -14,7 +14,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-
+from rest_api.endpointsFavorites import toggle_favorite
 from rest_api.endpointsRecipe import *
 from rest_api.endpointsUser import *
 from rest_api.endpointsCategory import * #Importa todas las funciones que hay en endpointsCategory.py
@@ -28,4 +28,5 @@ urlpatterns = [
     path("categories/<int:category_id>/image", get_category_image), #Devuelve las imágenes de las categorías
     path('users', create_user),
     path('sessions', login_user),
+    path("recipes/<int:recipe_id>/favorite", toggle_favorite),
 ]
