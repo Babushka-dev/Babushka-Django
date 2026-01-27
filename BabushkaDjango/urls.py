@@ -25,6 +25,7 @@ urlpatterns = [
     path("recipes", manage_recipe),
     path("recipes/<int:id>/image", get_recipe_image),
     path("categories", get_categories), #Devuelve el JSON con las categorías
+    path("categories/<int:category_id>/image", get_category_image), #Devuelve las imágenes de las categorías
     path('users', create_user),
     path('sessions', login_user),
 ]
