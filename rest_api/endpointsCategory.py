@@ -1,8 +1,7 @@
-import base64 #Importa una librería de Python que sirve para convertir datos binarios (bytes) en texto (Base64)
-              #La necesitamos porque cat.image es binario y JSON no puede enviar binarios
+import base64 
 from django.http import JsonResponse, \
-    HttpResponse  # Importa la clase que permite devolver respuestas HTTP en formato JSON desde Django
-from .models import Category #Importa el modelo Category para poder leer las categorías de la base de datos
+    HttpResponse 
+from .models import Category
 
 
 #Esta función lee todas las categorías de la BD, convierte sus imágenes a texto Base64 y devuelve un JSON con id, nombre e imagen
@@ -30,8 +29,6 @@ def get_categories(request): #Define una función que Django usará como endpoin
     #Con safe=False le indicamos que, aunque sea una lista en vez de un objeto, lo devuelva igualmente
 
 
-
-
 def get_category_image(request, category_id):
     # Busca la categoría en la base de datos usando su ID
     try:
@@ -48,6 +45,3 @@ def get_category_image(request, category_id):
 
     # Devuelve la imagen como respuesta HTTP
     return HttpResponse(category.image, content_type='image/jpeg')
-
-
-

@@ -17,16 +17,24 @@ Including another URLconf
 from rest_api.endpointsFavorites import toggle_favorite
 from rest_api.endpointsRecipe import *
 from rest_api.endpointsUser import *
-from rest_api.endpointsCategory import * #Importa todas las funciones que hay en endpointsCategory.py
+from rest_api.endpointsProfile import *
+from rest_api.endpointsCategory import *
 from django.urls import path
 
 urlpatterns = [
     path("health", health),
+  
     path("recipes", manage_recipe),
     path("recipes/<int:id>/image", get_recipe_image),
-    path("categories", get_categories), #Devuelve el JSON con las categorías
-    path("categories/<int:category_id>/image", get_category_image), #Devuelve las imágenes de las categorías
+    path("recipes/<int:recipe_id>/favorite", toggle_favorite),
+  
+    path('users/me/recipes', get_created_recipes),
+    path('users/me/favorites', get_favorite_recipes),
+    path('users/me/info', get_user_info),
+  
     path('users', create_user),
     path('sessions', login_user),
-    path("recipes/<int:recipe_id>/favorite", toggle_favorite),
+    
+    path("categories", get_categories),
+    path("categories/<int:category_id>/image", get_category_image), 
 ]
