@@ -1,70 +1,47 @@
-import json
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+import base64 
+from django.http import JsonResponse, \
+    HttpResponse 
 from .models import Category
-import base64
 
-#  CREAR CATEGORÍA
-@csrf_exempt
-def create_category(request):
-    if request.method != 'POST':  # Si el método no es POST: ERROR
-        return JsonResponse(
-            {'status': 'error', 'message': 'Method not allowed'},
-            status=405
-        )
 
+#Esta función lee todas las categorías de la BD, convierte sus imágenes a texto Base64 y devuelve un JSON con id, nombre e imagen
+
+def get_categories(request): #Define una función que Django usará como endpoint. request es la petición HTTP que llega del cliente (Android, navegador, ...)
+    categories = Category.objects.all() #Solicita todas las filas de la tabla Category
+
+    data = [] #Lista vacía de Python donde vamos a construir la respuesta JSON
+
+    for cat in categories: #Recorre cada categoría de la base de datos
+        image_base64 = None #Por defecto indicamos que la categoría no tiene imagen
+        if cat.image: #Si tiene imagen:
+            image_base64 = base64.b64encode(cat.image).decode("utf-8")
+            #cat.image --> son bytes (binario)
+            #base64.b64encode --> convierte esos bytes en Base64
+            #decode("utf-8") --> convierte eso en texto normal (string)
+            #Como resultado obtenemos una cadena de texto que se puede enviar en JSON
+
+        data.append({ #Añadimos un nuevo elemento a la lista "data"
+            "id": cat.id, #Id de la categoría
+            "name": cat.name, #Nombre de la categoría
+        })
+
+    return JsonResponse(data, safe=False) #Devuelve la lista data como respuesta JSON HTTP
+    #Con safe=False le indicamos que, aunque sea una lista en vez de un objeto, lo devuelva igualmente
+
+
+def get_category_image(request, category_id):
+    # Busca la categoría en la base de datos usando su ID
     try:
-        data = json.loads(request.body)
-    except json.JSONDecodeError:
-        return JsonResponse(
-            {'status': 'error', 'message': 'Invalid JSON'},
-            status=400
-        )
+        category = Category.objects.get(id=category_id)
+    except Category.DoesNotExist:
+        # Si no existe, devuelve un error 404 en formato JSON
+        return JsonResponse({"error": "Not found"}, status=404)
 
-    image_base64 = data.get('imageBase64')
-    name = data.get('name')
+    # Comprueba si la categoría tiene imagen
+    if not category.image:
+        # Si no tiene imagen, devuelve otro error 404
+        return JsonResponse({"error": "No image"}, status=404)
 
-    # Si el nombre o la imagen están vacíos
-    if not name or not image_base64:
-        return JsonResponse(
-            {'status': 'error', 'message': 'Missing category name or image'},
-            status=400
-        )
 
-    # Si el nombre tiene más de 25 caracteres
-    if len(name) > 25:
-        return JsonResponse(
-            {'status': 'error', 'message': 'Category name cannot be over 25 characters'},
-            status=400
-        )
-
-    # Si la categoría ya existe
-    if Category.objects.filter(name=name).exists():
-        return JsonResponse(
-            {'status': 'error', 'message': 'Category already exists'},
-            status=400
-        )
-
-    # Procesamos la imagen Base64
-    try:
-        image_bytes = base64.b64decode(image_base64)
-    except Exception:
-        return JsonResponse(
-            {'status': 'error', 'message': 'Invalid imageBase64'},
-            status=400
-        )
-
-    # Creamos la categoría (active = True por defecto)
-    category = Category.objects.create(
-        name=name,
-        active=True,
-        image=image_bytes
-    )
-
-    return JsonResponse(
-        {
-            'message': 'Category created successfully',
-            'category_id': category.id
-        },
-        status=201
-    )
+    # Devuelve la imagen como respuesta HTTP
+    return HttpResponse(category.image, content_type='image/jpeg')
