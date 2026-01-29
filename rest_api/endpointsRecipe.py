@@ -138,7 +138,7 @@ def get_recipes(request):
             'difficulty': recipe.difficulty,
             'isFavorite': recipe in favorites, # Comprobar si receta está en el array (en boleeano)
         })
-    return JsonResponse({'status': 'success', 'count': len(data), 'data': data}, status=200)
+    return JsonResponse(data, status=200, safe=False)
 
 @csrf_exempt
 def get_recipe_image(request, id):

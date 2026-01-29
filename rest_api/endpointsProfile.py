@@ -38,7 +38,7 @@ def get_created_recipes(request):
             'difficulty': recipe.difficulty,
             'isFavorite': recipe in favorites # Si receta está en el array favorites = receta es favorita (Tipo boolean)
         })
-    return JsonResponse({'status': 'success', 'count': len(data), 'data': data}, status=200)
+    return JsonResponse(data, status=200, safe=False)
 
 @csrf_exempt
 def get_favorite_recipes(request):
@@ -71,7 +71,7 @@ def get_favorite_recipes(request):
             'difficulty': recipe.difficulty,
             'isFavorite': True # Todas recetas son favoritas
         })
-    return JsonResponse({'status': 'success', 'count': len(data), 'data': data}, status=200)
+    return JsonResponse(data, status=200, safe=False)
 
 @csrf_exempt
 def get_user_info(request):
@@ -94,13 +94,10 @@ def get_user_info(request):
 
     return JsonResponse(
         {
-            'status': 'success',
-            'data': {
-                'id': user.id,
-                'username': user.username,
-                'countCreatedRecipe': recipes.count(),
-                'countFavoriteRecipe': favRecipes.count(),
-            }
+            'id': user.id,
+            'username': user.username,
+            'countCreatedRecipe': recipes.count(),
+            'countFavoriteRecipe': favRecipes.count(),
         },
-        status=200
+        status=200, safe=False
     )
