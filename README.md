@@ -14,9 +14,9 @@ Babushka Django is the active backend server for the project. It provides the RE
 
 ## Project Pair
 
-- [**Babushka Android**](../Babushka-android): the mobile client that users interact with.
-- [**Babushka Django**](../Babushka-backend-django): this active backend REST API.
-- [**Babushka Spring**](../Babushka-backend-spring): the old backend prototype, kept for reference.
+- [**Babushka Android**](https://github.com/Babushka-dev/Babushka-Android): the mobile client that users interact with.
+- [**Babushka Django**](https://github.com/Babushka-dev/Babushka-Django): this active backend REST API.
+- [**Babushka Spring**](https://github.com/Babushka-dev/Babushka-Spring): the old backend prototype, kept for reference.
 
 The Android app is configured to call this backend locally at:
 
