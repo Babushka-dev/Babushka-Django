@@ -15,7 +15,6 @@ class Category(models.Model):
     active = models.BooleanField()
 
     class Meta:
-        managed = False
         db_table = 'category'
 
 
@@ -32,7 +31,6 @@ class Recipe(models.Model):
     active = models.BooleanField()
 
     class Meta:
-        managed = False
         db_table = 'recipe'
 
 
@@ -42,7 +40,6 @@ class RecipeCategories(models.Model):
     category = models.ForeignKey(Category, models.DO_NOTHING)
 
     class Meta:
-        managed = False
         db_table = 'recipe_categories'
 
 
@@ -53,7 +50,6 @@ class User(models.Model):
     active = models.BooleanField()
 
     class Meta:
-        managed = False
         db_table = 'user'
 
 
@@ -63,7 +59,6 @@ class Session(models.Model):
     user_id = models.BigIntegerField()
 
     class Meta:
-        managed = False
         db_table = 'session'
 
 
@@ -73,5 +68,4 @@ class UserFavoriteRecipes(models.Model):
     recipe = models.ForeignKey(Recipe, models.DO_NOTHING)
 
     class Meta:
-        managed = False
         db_table = 'user_favorite_recipes'

@@ -63,12 +63,8 @@ WSGI_APPLICATION = 'BabushkaDjango.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'babushka_db',
-        'USER': 'babushka',
-        'PASSWORD': 'PUT_YOUR_PASSWORD_HERE',
-        'HOST': '82.26.150.189',
-        'PORT': '5432',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
